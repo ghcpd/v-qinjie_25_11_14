@@ -1,0 +1,12 @@
+<!doctype html>
+<html>
+<head>
+    <title>Preview</title>
+</head>
+<body>
+<h2>Preview (vulnerable)</h2>
+<!-- Unsafe: render uploaded user content unescaped -->
+<div id="preview">{{ content|safe }}</div>
+
+</body>
+</html>
