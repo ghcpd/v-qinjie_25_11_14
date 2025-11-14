@@ -1,0 +1,14 @@
+{
+  "vulnerability_description": "Describe the UI-side leak, secret exposure, or unsafe execution.",
+  "exploit_steps": [
+    "Step 1 - how an attacker would trigger or read the vulnerability.",
+    "Step 2 - what payload/action is used to extract secrets or execute code.",
+    "Step 3 - what result is observed (e.g., API key retrieved, script executed)."
+  ],
+  "expected_vs_actual": {
+    "expected": "Minimal UI-only exposures, secrets hidden, safe client execution.",
+    "actual": "List the UI content and responses that prove the vulnerability."
+  },
+  "patch_summary": "List what changes were applied: e.g., mask API keys, remove eval, sanitize input.",
+  "regression_test_results": "Describe the regression test suite and its status for ensuring the weakness remains resolved."
+}
