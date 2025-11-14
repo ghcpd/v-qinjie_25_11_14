@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+<head>
+    <title>Patched Dashboard</title>
+    <script src="/static/js/client.js" defer></script>
+</head>
+<body onload="requestMaskedKey()">
+<h1>Patched Dashboard</h1>
+<p id="api-key">API Key: [HIDDEN]</p>
+<p>Upload a HTML file to preview:</p>
+<form id="upload-form" method="post" action="/upload" enctype="multipart/form-data">
+    <input type="file" name="file">
+    <input type="submit" value="Upload">
+</form>
+
+<div id="preview"></div>
+
+</body>
+</html>

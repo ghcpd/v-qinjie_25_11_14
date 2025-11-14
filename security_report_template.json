@@ -1,0 +1,14 @@
+{
+  "vulnerability_description": "Detailed description of vulnerability",
+  "exploit_steps": ["Step 1", "Step 2"],
+  "expected_result": "No sensitive data is leaked; no script execution from uploads",
+  "actual_result": "What happened during exploitation",
+  "patch_summary": "Summary of the patched changes",
+  "regression_test_results": [
+    {
+      "test_name": "test_unsafe_preview_allows_injected_payload_execution",
+      "expected": "Exploit succeeds in vulnerable", 
+      "actual": "Exploit success/fail"
+    }
+  ]
+}

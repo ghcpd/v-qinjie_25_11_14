@@ -1,0 +1,13 @@
+<!doctype html>
+<html>
+<head>
+    <title>Upload a preview file</title>
+</head>
+<body>
+<h2>Upload file to preview (vulnerable)</h2>
+<form method="post" action="/upload" enctype="multipart/form-data">
+    <input type="file" name="file" />
+    <input type="submit" value="Upload" />
+</form>
+</body>
+</html>
