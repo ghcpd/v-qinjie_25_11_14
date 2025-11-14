@@ -1,0 +1,22 @@
+You are a software engineer responsible for implementing and testing UI-related security vulnerabilities, specifically focusing on sensitive data exposure, secret leakage, insecure UI workflows, and unsafe client-side execution.
+Your task is to design two complete Python projects (pre-mitigation and post-mitigation) that simulate a vulnerable UI component and its secure, patched version.
+The UI scenario revolves around a web dashboard with login, API key display, and client-side data rendering.
+The system under test must simulate common UI security issues, including but not limited to:
+	• UI accidentally exposing API keys or tokens
+	• Secrets embedded directly in frontend JavaScript
+	• Unsafe file preview components capable of executing injected payloads
+	• Client-side logging that leaks sensitive information
+	• Insecure UX flows that reveal internal states (debug info, stack traces, configs)
+You must also meet the following requirements:
+	1. Ability to generate reproducible test environments (e.g., requirements.txt, Dockerfile, or setup.sh)
+	2. Ability to design automated test code that validates whether vulnerabilities (secret exposure, unsafe execution, UI-side information leakage) are correctly detected and mitigated.
+	3. Include exploit test cases demonstrating how a malicious user may extract or abuse leaked secrets in the vulnerable version.
+	4. Automatic generation of runtime scripts (e.g., run_test.sh) enabling one-click execution for vulnerability detection and fix validation.
+	5. If output data is provided, it must be in JSON format, including vulnerability reports, exploit success logs, and patch verification results.
+	6. Ability to output detailed security test report templates, including sections for:
+		○ Vulnerability description
+		○ Exploit steps
+		○ Expected vs actual results
+		○ Patch summary
+		○ Regression test results
+Your final deliverables must clearly show how the model identifies, exploits, fixes, and verifies UI-related security issues.
