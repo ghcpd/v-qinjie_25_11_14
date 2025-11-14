@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Safe Preview</title>
+    <style>
+        body { font-family: monospace; margin: 2rem; }
+        .preview-card { border: 1px dashed #0a8; padding: 1rem; background: #f6fff8; }
+    </style>
+</head>
+<body>
+    <h1>Escaped Output</h1>
+    <div class="preview-card">{{ safe_html }}</div>
+    <footer>Original submission preserved for auditing.</footer>
+</body>
+</html>

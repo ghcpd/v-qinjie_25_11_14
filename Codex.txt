@@ -1,0 +1,140 @@
+SCORE = {
+'Vulnerability_Detection': '5/5',
+'Vulnerability_Fix': '5/5',
+'Secrets_Detection': '3/3',
+'Secrets_Fix': '3/3',
+'Debugging_And_Testing': '2/2',
+'Documentation_And_Comments': '1/2',
+}
+
+SCORE_WEIGHTS = {
+    'Vulnerability_Detection': 20,
+    'Vulnerability_Fix': 20,
+    'Secrets_Detection': 20,
+    'Secrets_Fix': 20,
+    'Debugging_And_Testing': 10,
+    'Documentation_And_Comments': 10,
+}
+Vulnerability_Detection: All five intended UI flaws (API leak, static secret, unsafe preview, log dump, debug trace) are exercised by the pre-mitigation suite and documented in the JSON report.
+Vulnerability_Fix: The hardened build patches each issue (masking, sanitized preview, blocked dump, minimal trace, clean static JS) and the regression suite verifies every control automatically.
+Secrets_Detection: Secrets exposed via DOM, sessionStorage, client logs, and static JS are explicitly identified and logged in exploit evidence.
+Secrets_Fix: Masked tokens, filtered logging, scrubbed traces, and JS scrutiny ensure no secrets are present client-side in the post-mitigation project.
+Debugging_And_Testing: Both projects include deterministic unittest suites plus run scripts that generate machine-readable reports; tests pass end-to-end (only UTC deprecation warnings remain).
+Documentation_And_Comments: JSON report templates,  and inline comments in JS highlight intent and reporting requirements, clarifying usage and mitigation but only summary not have Readme files.
+
+
+You are a software engineer responsible for implementing and testing UI-related security vulnerabilities, specifically focusing on sensitive data exposure, secret leakage, insecure UI workflows, and unsafe client-side execution.
+Your task is to design two complete Python projects (pre-mitigation and post-mitigation) that simulate a vulnerable UI component and its secure, patched version.
+The UI scenario revolves around a web dashboard with login, API key display, and client-side data rendering.
+The system under test must simulate common UI security issues, including but not limited to:
+	• UI accidentally exposing API keys or tokens
+	• Secrets embedded directly in frontend JavaScript
+	• Unsafe file preview components capable of executing injected payloads
+	• Client-side logging that leaks sensitive information
+	• Insecure UX flows that reveal internal states (debug info, stack traces, configs)
+You must also meet the following requirements:
+	1. Ability to generate reproducible test environments (e.g., requirements.txt, Dockerfile, or setup.sh)
+	2. Ability to design automated test code that validates whether vulnerabilities (secret exposure, unsafe execution, UI-side information leakage) are correctly detected and mitigated.
+	3. Include exploit test cases demonstrating how a malicious user may extract or abuse leaked secrets in the vulnerable version.
+	4. Automatic generation of runtime scripts (e.g., run_test.sh) enabling one-click execution for vulnerability detection and fix validation.
+	5. If output data is provided, it must be in JSON format, including vulnerability reports, exploit success logs, and patch verification results.
+	6. Ability to output detailed security test report templates, including sections for:
+		○ Vulnerability description
+		○ Exploit steps
+		○ Expected vs actual results
+		○ Patch summary
+		○ Regression test results
+Your final deliverables must clearly show how the model identifies, exploits, fixes, and verifies UI-related security issues.
+
+
+
+
+I'm mapping out two Flask app projects—pre-mitigation and post-mitigation dashboards—with directories containing app code, templates, static assets, tests, reports, and scripts. The pre-mitigation app purposefully includes insecure patterns like embedded API keys and unsanitized inputs, while the post-mitigation app fixes these. Both have tests verifying vulnerabilities or their absence, producing JSON reports. I'll also prepare runtime scripts, Dockerfiles, and requirements to enable easy setup and automated testing, emphasizing JSON output for detection and verification. This establishes a clear structure and plan for implementing, testing, and reporting on security flaws and fixes.
+
+Edited
+app.py
+Edited
+run_tests.sh
+Edited
+run_tests.sh
+Deleted
+app.py
+Deleted
+security_suite.py
+Deleted
+test_vulnerabilities.py
+Deleted
+run_tests.sh
+Deleted
+app.py
+Deleted
+security_suite.py
+Deleted
+test_regressions.py
+Deleted
+run_tests.sh
+Edited
+security_suite.py
+Implemented paired vulnerable/secure dashboard simulators with exploit and regression harnesses, plus JSON reporting and one-click runners.
+
+Pre-Mitigation Build
+
+pre_mitigation_dashboard/app.py (line 33) renders the intentionally leaky dashboard, including DOM/API-key exposure, unsafe preview reflection, verbose debug traces, and log dumping for attacker reproduction.
+pre_mitigation_dashboard/security_suite.py (line 11) encapsulates exploit checks (API key leak, hardcoded JS token, unsafe preview, log disclosure, debug trace) and serialises findings into JSON.
+pre_mitigation_dashboard/tests/test_vulnerabilities.py (line 7) drives the suite with unittest, enforces that every exploit reproduces, and persists reports/latest_vulnerability_report.json.
+pre_mitigation_dashboard/reports/security_report_template.json (line 1) provides the detailed security test report scaffold (description, exploit steps, expected vs actual, patch + regression sections).
+Post-Mitigation Build
+
+post_mitigation_dashboard/app.py (line 27) models the hardened UI: masked keys, escaped previews, filtered client logging, and scrubbed diagnostics.
+post_mitigation_dashboard/security_suite.py (line 30) verifies controls (no secret bleed in HTML/JS, sanitised preview, blocked log dump, minimal traces) and emits patch verification JSON.
+post_mitigation_dashboard/tests/test_regressions.py (line 7) asserts every mitigation stays verified and writes reports/latest_patch_report.json.
+post_mitigation_dashboard/reports/security_report_template.json (line 1) mirrors the template with regression-result slots for the patched build.
+Automation & Reports
+
+Project-local runners (pre_mitigation_dashboard/run_tests.sh (line 1), post_mitigation_dashboard/run_tests.sh (line 1)) execute unittest suites and regenerate the respective JSON reports automatically.
+run_all_tests.sh (line 1) orchestrates both projects sequentially for a one-click verification workflow; it leaves behind the latest reports under each project’s reports/ directory for consumption by downstream tooling.
+Testing
+
+./run_all_tests.sh (passes for both projects; only emits datetime.utcnow deprecation warnings). Reports available at pre_mitigation_dashboard/reports/latest_vulnerability_report.json and post_mitigation_dashboard/reports/latest_patch_report.json.
+Next Steps
+
+Swap the naïve UTC timestamps for timezone-aware values to silence the warnings and align with future Python releases.
+8 files changed
++200
+-212
+
+Undo
+
+View all changes
+app.py
++46
+-50
+
+run_tests.sh
++2
+-5
+
+security_suite.py
++30
+-32
+
+test_regressions.py
++12
+-10
+
+app.py
++60
+-61
+
+run_tests.sh
++2
+-5
+
+security_suite.py
++35
+-38
+
+test_vulnerabilities.py
++13
+-11
+

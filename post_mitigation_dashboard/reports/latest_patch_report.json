@@ -1,0 +1,42 @@
+{
+  "project": "post_mitigation_dashboard",
+  "generated_at": "2025-11-14T04:13:20.984516",
+  "regression_checks": [
+    {
+      "name": "API key redaction",
+      "description": "Dashboard masks API keys before rendering.",
+      "status": "verified",
+      "evidence": "masked",
+      "severity": "info"
+    },
+    {
+      "name": "Static assets clean",
+      "description": "Secure JavaScript helper avoids eval and embedded secrets.",
+      "status": "verified",
+      "evidence": "// Hardened client helper that never embeds production secrets.",
+      "severity": "info"
+    },
+    {
+      "name": "Preview escaping",
+      "description": "Preview output escapes user input to prevent script execution.",
+      "status": "verified",
+      "evidence": "<div class='preview-card'>&lt;script&gt;alert('owned')&lt;/script&gt;</div>",
+      "severity": "info"
+    },
+    {
+      "name": "Client log access control",
+      "description": "Direct log dump is disabled.",
+      "status": "verified",
+      "evidence": "forbidden",
+      "severity": "info"
+    },
+    {
+      "name": "Trace scrubbing",
+      "description": "Support traces omit secrets and config details.",
+      "status": "verified",
+      "evidence": "{\"message\": \"Diagnostics hidden. Contact support with request id.\", \"request_id\": \"20251114041320\"}",
+      "severity": "info"
+    }
+  ],
+  "verified_controls": 5
+}

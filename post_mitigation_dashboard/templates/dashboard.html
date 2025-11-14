@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hardened Dashboard</title>
+    <script src="{{ url_for('static', filename='secure.js') }}" defer></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        .panel { border: 1px solid #0a8; padding: 1rem; margin-bottom: 1.5rem; }
+        textarea { width: 100%; min-height: 120px; }
+    </style>
+</head>
+<body>
+    <h1>Welcome {{ username }}</h1>
+    <section class="panel">
+        <h2>Masked API Key</h2>
+        <p id="api-key" data-secret="redacted">{{ masked_key }}</p>
+        <small>Full key never leaves the server. Request ID: {{ issued_at }}</small>
+    </section>
+
+    <section class="panel">
+        <h2>File Preview (Escaped)</h2>
+        <form action="/preview" method="post" target="_blank">
+            <textarea name="preview" placeholder="Paste markdown or HTML"></textarea>
+            <button type="submit">Safe Preview</button>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>Client Logger</h2>
+        <p id="log-status">No sensitive diagnostics will be sent.</p>
+    </section>
+
+    <script>
+        const logStatus = document.getElementById('log-status');
+        fetch('/client-log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: 'ui-loaded', level: 'info' })
+        }).then(r => r.json()).then(data => {
+            logStatus.textContent = 'Stored log id ' + data.stored.received_at;
+        });
+    </script>
+</body>
+</html>

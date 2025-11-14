@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Unsafe Preview</title>
+    <style>
+        body { font-family: monospace; margin: 2rem; }
+        .preview-card { border: 1px dashed #f33; padding: 1rem; }
+    </style>
+</head>
+<body>
+    <h1>Rendered Output</h1>
+    <div class="preview-card">{{ raw_html | safe }}</div>
+    <footer>Original submission: {{ original }}</footer>
+</body>
+</html>
