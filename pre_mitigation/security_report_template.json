@@ -1,0 +1,10 @@
+{
+  "vulnerability_description": "",
+  "exploit_steps": [],
+  "expected_vs_actual_results": {
+    "expected": "",
+    "actual": ""
+  },
+  "patch_summary": "",
+  "regression_test_results": []
+}
