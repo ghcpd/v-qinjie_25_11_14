@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vulnerable Dashboard</title>
+    <script src="{{ url_for('static', filename='leaky.js') }}" defer></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        .panel { border: 1px solid #999; padding: 1rem; margin-bottom: 1.5rem; }
+        textarea { width: 100%; min-height: 120px; }
+    </style>
+</head>
+<body>
+    <h1>Welcome {{ username }}</h1>
+    <section class="panel">
+        <h2>API Key</h2>
+        <p id="api-key">{{ api_key }}</p>
+        <small>Copied to client storage for convenience.</small>
+    </section>
+
+    <section class="panel">
+        <h2>Debug State</h2>
+        <pre id="debug">{{ debug_blob }}</pre>
+        <p>Stack trace: {{ stack_trace }}</p>
+    </section>
+
+    <section class="panel">
+        <h2>File Preview</h2>
+        <form action="/preview" method="post" target="_blank">
+            <textarea name="preview" placeholder="Paste markdown, HTML, or scripts"></textarea>
+            <button type="submit">Unsafe Preview</button>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>Client Logger</h2>
+        <p id="log-status">Sending sensitive diagnostics...</p>
+    </section>
+
+    <script>
+        const USER_API_KEY = "{{ api_key }}";
+        window.__DEBUG_CONFIG__ = {{ debug_raw | tojson }};
+        sessionStorage.setItem('apiKey', USER_API_KEY);
+        console.log('Debug dump', window.__DEBUG_CONFIG__);
+
+        fetch('/client-log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: 'User ' + {{ username | tojson }} + ' logged in',
+                apiKey: USER_API_KEY,
+                debug: window.__DEBUG_CONFIG__
+            })
+        }).then(r => r.json())
+          .then(data => {
+              document.getElementById('log-status').textContent = 'Logged payload ' + JSON.stringify(data.echo);
+          });
+    </script>
+</body>
+</html>
