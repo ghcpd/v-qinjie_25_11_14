@@ -1,0 +1,94 @@
+{
+  "vulnerable_dashboard": {
+    "vulnerabilities": [
+      {
+        "id": "plaintext-api-key",
+        "description": "API key is rendered in plaintext on the page.",
+        "detail": "VULN-SECRET-KEY-12345"
+      },
+      {
+        "id": "embedded-secrets",
+        "description": "Secrets are hard-coded in JavaScript and can be read by anyone inspecting the page.",
+        "detail": "API_KEY defined in client-side script; ADMIN_TOKEN defined in client-side script"
+      },
+      {
+        "id": "unsafe-execution",
+        "description": "Client-side eval() is called on user-supplied payloads.",
+        "detail": "eval() usage found which may execute attacker-controlled input."
+      },
+      {
+        "id": "debug-leak",
+        "description": "Internal debug information is exposed directly in the UI.",
+        "detail": "Traceback or debug info text found on the page."
+      },
+      {
+        "id": "sensitive-logging",
+        "description": "Console logs emit sensitive secrets or debugging information.",
+        "detail": "console.log() calls exist in the inline scripts."
+      }
+    ],
+    "exploit_logs": [
+      {
+        "target": "API Key",
+        "method": "HTML scraping",
+        "result": "VULN-SECRET-KEY-12345",
+        "status": "success"
+      },
+      {
+        "target": "File preview",
+        "method": "Eval injection",
+        "result": "Attacker payload would run via eval(); impossible to guarantee safety.",
+        "status": "success"
+      },
+      {
+        "target": "Client loggers",
+        "method": "Log inspection",
+        "result": [
+          "'Preview request for payload:', payload",
+          "'Using API key:', API_KEY",
+          "'Using admin token:', ADMIN_TOKEN"
+        ],
+        "status": "info"
+      }
+    ],
+    "summary": "Sensitive secrets appear in HTML/JS, and unsafe eval paths are present."
+  },
+  "secure_dashboard": {
+    "vulnerabilities": [],
+    "exploit_logs": [
+      {
+        "target": "API Key",
+        "method": "HTML scraping",
+        "result": "SECU**********",
+        "status": "partial"
+      },
+      {
+        "target": "File preview",
+        "method": "Eval injection",
+        "result": "no eval found",
+        "status": "failure"
+      },
+      {
+        "target": "Client loggers",
+        "method": "Log inspection",
+        "result": [],
+        "status": "info"
+      }
+    ],
+    "summary": "Secrets are masked, scripts avoid eval, and debugger data is hidden."
+  },
+  "patch_verification": {
+    "description": "Mask API keys, remove embedded secrets, and sanitize preview execution.",
+    "status": "verified"
+  },
+  "regression_tests": {
+    "name": "tests.test_detection",
+    "status": "pass",
+    "details": {
+      "testsRun": 4,
+      "failures": 0,
+      "errors": 0
+    },
+    "description": "Validates detection/exploit helpers for both dashboard versions."
+  }
+}
