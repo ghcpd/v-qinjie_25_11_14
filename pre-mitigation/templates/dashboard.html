@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard - Vulnerable</title>
+    <style>
+        body { font-family: Arial; margin: 20px; background: #f9f9f9; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .secret-box { background: white; padding: 15px; margin: 10px 0; border-left: 4px solid #ff6b6b; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .code { font-family: monospace; background: #f0f0f0; padding: 8px; overflow-x: auto; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        .section { margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Secure Dashboard</h1>
+        <p>Welcome, <span id="username"></span>!</p>
+        
+        <div class="section">
+            <h2>User Data</h2>
+            <button onclick="fetchUserData()">Load User Data</button>
+            <div id="user-data" class="secret-box" style="display:none;"></div>
+        </div>
+        
+        <div class="section">
+            <h2>File Preview Test</h2>
+            <button onclick="testFilePreview()">Try XSS Payload</button>
+            <div id="preview-result" class="secret-box" style="display:none;"></div>
+        </div>
+        
+        <div class="section">
+            <h2>Debug Information</h2>
+            <button onclick="loadDebugInfo()">Load Debug Info</button>
+            <div id="debug-info" class="secret-box" style="display:none;"></div>
+        </div>
+        
+        <div class="section">
+            <h2>Client-Side Secrets</h2>
+            <p>Check your browser console (F12) for leaked secrets!</p>
+            <button onclick="showConsoleSecrets()">Show Secrets in Console</button>
+        </div>
+    </div>
+
+    <script>
+        // VULNERABILITY: Hardcoded secrets in frontend JavaScript
+        const API_KEY = "{{ api_key }}";
+        const STRIPE_KEY = "{{ stripe_key }}";
+        const INTERNAL_API = "{{ internal_api }}";
+        
+        document.getElementById('username').textContent = "{{ user }}";
+        
+        // VULNERABILITY: Log all secrets to console immediately
+        console.log('=== APPLICATION SECRETS (EXPOSED) ===');
+        console.log('API Key:', API_KEY);
+        console.log('Stripe Key:', STRIPE_KEY);
+        console.log('Internal API:', INTERNAL_API);
+        console.log('LocalStorage:', localStorage);
+        console.log('SessionStorage:', sessionStorage);
+        
+        function fetchUserData() {
+            fetch('/api/user-data')
+                .then(r => r.json())
+                .then(data => {
+                    console.log('User data response:', data);
+                    const div = document.getElementById('user-data');
+                    div.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                    div.style.display = 'block';
+                });
+        }
+        
+        function testFilePreview() {
+            const xssPayload = '<img src=x onerror="alert(\'XSS Vulnerability Demonstrated\')">';
+            
+            fetch('/api/preview-file', {
+                method: 'POST',
+                body: new URLSearchParams({
+                    filename: 'test.html',
+                    content: xssPayload
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                console.log('Preview result:', data);
+                const div = document.getElementById('preview-result');
+                div.innerHTML = '<h3>Preview Result:</h3><p>XSS Payload returned without sanitization!</p><div class="code">' + 
+                                JSON.stringify(data, null, 2) + '</div>';
+                div.style.display = 'block';
+            });
+        }
+        
+        function loadDebugInfo() {
+            fetch('/api/debug-info')
+                .then(r => r.json())
+                .then(data => {
+                    console.log('Debug info:', data);
+                    const div = document.getElementById('debug-info');
+                    div.innerHTML = '<h3>Complete System Debug Info:</h3><div class="code">' + 
+                                    JSON.stringify(data, null, 2) + '</div>';
+                    div.style.display = 'block';
+                });
+        }
+        
+        function showConsoleSecrets() {
+            console.log('=== SECRET EXTRACTION ===');
+            console.log('API Key:', API_KEY);
+            console.log('Stripe Key:', STRIPE_KEY);
+            console.log('Stored in localStorage:', localStorage.getItem('api_key'));
+            console.log('Session ID:', document.cookie);
+            alert('All secrets have been logged to console. Open DevTools to view!');
+        }
+    </script>
+</body>
+</html>

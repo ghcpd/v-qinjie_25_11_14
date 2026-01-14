@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Secure Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .info-box { background: white; padding: 15px; margin: 10px 0; border-left: 4px solid #28a745; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; margin: 5px; border-radius: 4px; }
+        button:hover { background: #0056b3; }
+        .section { margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Secure Dashboard</h1>
+        <p>Welcome, <span id="username"></span>!</p>
+        
+        <div class="section">
+            <h2>Security Features</h2>
+            <div class="info-box">
+                <h3>✓ Secrets Protection</h3>
+                <p>API keys and secrets are never exposed in responses or frontend code.</p>
+            </div>
+            
+            <div class="info-box">
+                <h3>✓ Input Sanitization</h3>
+                <p>All user inputs are properly escaped to prevent XSS attacks.</p>
+            </div>
+            
+            <div class="info-box">
+                <h3>✓ Secure Headers</h3>
+                <p>Content Security Policy and other security headers are enforced.</p>
+            </div>
+            
+            <div class="info-box">
+                <h3>✓ No Debug Info</h3>
+                <p>Debug endpoints and source code disclosure are disabled.</p>
+            </div>
+            
+            <div class="info-box">
+                <h3>✓ Secure Logging</h3>
+                <p>Sensitive data is not logged to console or files.</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>User Data</h2>
+            <button onclick="fetchUserData()">Load User Data</button>
+            <div id="user-data" class="info-box" style="display:none;"></div>
+        </div>
+        
+        <div class="section">
+            <h2>Safe File Preview</h2>
+            <button onclick="testSafePreview()">Test Safe Preview</button>
+            <div id="preview-result" class="info-box" style="display:none;"></div>
+        </div>
+        
+        <div class="section">
+            <h2>Session Management</h2>
+            <a href="/logout" style="padding: 10px 20px; background: #dc3545; color: white; text-decoration: none; border-radius: 4px; display: inline-block;">Logout</a>
+        </div>
+    </div>
+
+    <script>
+        // SECURE: No hardcoded secrets in JavaScript
+        // API keys are NEVER exposed in frontend code
+        
+        // Get username from page content (if needed)
+        document.getElementById('username').textContent = "{{ user }}";
+        
+        // SECURE: Console logging does NOT contain sensitive data
+        console.log('Dashboard loaded securely');
+        
+        function fetchUserData() {
+            fetch('/api/user-data')
+                .then(r => r.json())
+                .then(data => {
+                    console.log('User data loaded');
+                    const div = document.getElementById('user-data');
+                    div.innerHTML = '<h3>User Information</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                    div.style.display = 'block';
+                });
+        }
+        
+        function testSafePreview() {
+            // Test payload that would be XSS vulnerable in old version
+            const testPayload = '<img src=x onerror="alert(\'XSS\')">';
+            
+            fetch('/api/preview-file', {
+                method: 'POST',
+                body: new URLSearchParams({
+                    filename: 'test.html',
+                    content: testPayload
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                const div = document.getElementById('preview-result');
+                div.innerHTML = '<h3>Safe Preview Result:</h3><p>Input was sanitized and is now safe:</p><pre>' + 
+                                JSON.stringify(data, null, 2) + '</pre>';
+                div.style.display = 'block';
+            })
+            .catch(e => {
+                const div = document.getElementById('preview-result');
+                div.innerHTML = '<p>Error: ' + escape(e.message) + '</p>';
+                div.style.display = 'block';
+            });
+        }
+    </script>
+</body>
+</html>

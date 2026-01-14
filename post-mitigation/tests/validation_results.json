@@ -1,0 +1,66 @@
+{
+  "timestamp": "2025-11-14T13:04:37.058336",
+  "target": "http://localhost:5001",
+  "validations": [
+    {
+      "name": "No Secrets in Login Response",
+      "passed": false,
+      "details": [
+        "Error: HTTPSConnectionPool(host='localhost', port=5001): Max retries exceeded with url: /login (Caused by SSLError(SSLError(1, '[SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1006)')))"
+      ]
+    },
+    {
+      "name": "No Secrets in User Data Endpoint",
+      "passed": false,
+      "details": [
+        "Error: HTTPSConnectionPool(host='localhost', port=5001): Max retries exceeded with url: /login (Caused by SSLError(SSLError(1, '[SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1006)')))"
+      ]
+    },
+    {
+      "name": "XSS Prevention - Input Sanitization",
+      "passed": false,
+      "details": [
+        "Error: HTTPSConnectionPool(host='localhost', port=5001): Max retries exceeded with url: /login (Caused by SSLError(SSLError(1, '[SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1006)')))"
+      ]
+    },
+    {
+      "name": "Debug Endpoint Disabled",
+      "passed": true,
+      "details": [
+        "Debug endpoint not found (secure)"
+      ]
+    },
+    {
+      "name": "Source Code Not Exposed",
+      "passed": true,
+      "details": [
+        "\u2713 Source code endpoint not accessible"
+      ]
+    },
+    {
+      "name": "Security Headers Present",
+      "passed": false,
+      "details": [
+        "Error: HTTPSConnectionPool(host='localhost', port=5001): Max retries exceeded with url: / (Caused by SSLError(SSLError(1, '[SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1006)')))"
+      ]
+    },
+    {
+      "name": "No Stack Traces in Errors",
+      "passed": false,
+      "details": [
+        "Error: HTTPSConnectionPool(host='localhost', port=5001): Max retries exceeded with url: /nonexistent (Caused by SSLError(SSLError(1, '[SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1006)')))"
+      ]
+    },
+    {
+      "name": "Secure Session Management",
+      "passed": false,
+      "details": [
+        "Error: HTTPSConnectionPool(host='localhost', port=5001): Max retries exceeded with url: /login (Caused by SSLError(SSLError(1, '[SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1006)')))"
+      ]
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 6
+  }
+}
